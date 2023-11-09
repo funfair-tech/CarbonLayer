@@ -1,0 +1,21 @@
+title Carbon Layer
+
+participant Consumer
+participant Chainlink Automation
+participant EcoLayer
+
+participant Chainlink Node
+participant Carbon API
+
+
+Chainlink Automation->Chainlink Automation: register a time based upkeep
+Chainlink Automation->EcoLayer: upkeep calls requestCurrentTitle()
+EcoLayer->Chainlink Node: sendChainlinkRequestTo  run job
+Chainlink Node->Carbon API: request latest status
+Carbon API->Chainlink Node: latest status response
+Chainlink Node->Chainlink Node: parse response
+Chainlink Node->(2)EcoLayer: run fulfillment function to update state
+
+
+Consumer->EcoLayer: request carbon intensity state
+EcoLayer->Consumer: carbon intensity state
