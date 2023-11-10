@@ -2,7 +2,7 @@
 
 ## Initial setup
 
-Configure the things in secrets and then run the following:
+Configure the items in ``chainlink-sepolia-secrets`` and then run the following:
 
 ```bash
 mkdir -p ~/.chainlink/sepolia/postgres/
