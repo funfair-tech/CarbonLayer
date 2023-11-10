@@ -12,11 +12,14 @@ services:
     ports:
       - 6688:6688
     command:
-      - -config /chainlink/config.json
-      - --add-host=host.docker.internal:host-gateway
-      - -secrets /chainlink/secrets.toml
+      - node
+      - -config
+      - /chainlink/config.toml
+      - -secrets
+      - /chainlink/secrets.toml
       - start
-      - -a /chainlink/.api
+      - -a
+      - /chainlink/.api
     restart: unless-stopped
     stop_grace_period: 500s
     stop_signal: SIGINT
