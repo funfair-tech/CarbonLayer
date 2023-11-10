@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  ## TODO: Configure chainlink
+  ## TODO: Configure postgresql
+  chainlink-sepolia-node:
+    image: smartcontract/chainlink:2.6.0
+    container_name: chainlink-sepolia-node
+    volumes:
+      - /mnt/ssd/sepolia:/root/.ethereum
+      - /home/oliver/secrets/sepolia/jwtsecret:/tmp/jwtsecret
+    ports:
+      - 30306:30306/tcp
+      - 30306:30306/udp
+      - 8548:8548
+      - 9548:9548
+    command:
+      - --sepolia
+      - --port=30306
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.corsdomain=*
+      - --http.api=eth,net,web3,txpool
+      - --http.port=8548
+      - --ws
+      - --ws.addr=0.0.0.0
+      - --ws.port=9548
+      - --ws.origins=*
+      - --http.vhosts=2.sepolia.geth.clients.funfair.io
+      - --v5disc
+      - --rpc.allow-unprotected-txs
+      - --authrpc.jwtsecret=/tmp/jwtsecret
+      - --authrpc.port=10548
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.vhosts=sepolia
+      - --db.engine=pebble
+      - --state.scheme=path
+    restart: unless-stopped
+    stop_grace_period: 500s
+    stop_signal: SIGINT
+    ulimits:
+      nofile:
+        soft: 20000
+        hard: 20000

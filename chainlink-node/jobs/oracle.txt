@@ -1,0 +1,50 @@
+name                = "Get UK Carbon generation mix"
+type                = "directrequest"
+schemaVersion       = 1
+evmChainID          = 11155111
+contractAddress     = "TBD" # operator address
+minIncomingConfirmations = 0
+
+observationSource   = """
+    decode_log      [type="ethabidecodelog"
+                        abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                        data="$(jobRun.logData)"
+                        topics="$(jobRun.logTopics)"]
+
+    fetch                [type="http" method=GET url="https://api.carbonintensity.org.uk/generation"];
+
+    decode_log -> fetch
+
+    parse_biomass       [type="jsonparse" path="data/generationmix/fuel=biomass"];
+    parse_coal          [type="jsonparse" path="data/generationmix/fuel=coal"];
+    parse_imports       [type="jsonparse" path="data/generationmix/fuel=imports"];
+    parse_gas           [type="jsonparse" path="data/generationmix/fuel=gas"];
+    parse_nuclear       [type="jsonparse" path="data/generationmix/fuel=nuclear"];
+    parse_other         [type="jsonparse" path="data/generationmix/fuel=other"];
+    parse_hydro         [type="jsonparse" path="data/generationmix/fuel=hydro"];
+    parse_solar         [type="jsonparse" path="data/generationmix/fuel=solar"];
+    parse_wind          [type="jsonparse" path="data/generationmix/fuel=wind"];
+
+
+    fetch -> parse_biomass -> encode_data
+    fetch -> parse_coal -> encode_data
+    fetch -> parse_imports -> encode_data
+    fetch -> parse_gas -> encode_data
+    fetch -> parse_nuclear -> encode_data
+    fetch -> parse_other -> encode_data
+    fetch -> parse_hydro -> encode_data
+    fetch -> parse_solar -> encode_data
+    fetch -> parse_wind -> encode_data
+
+    encode_data [type="ethabiencode"
+        abi="(bytes32 _requestId, int64 _currentNum, string _currentTitle,string _currentDescription)"
+        data="{\\"_requestId\\": $(decode_log.requestId), \\"_currentNum\\": $(parse_num), \\"_currentTitle\\": $(parse_title), \\"_currentDescription\\": $(parse_description) }"]
+
+    encode_tx       [type="ethabiencode"
+                        abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
+                        data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"]
+    submit_tx       [type="ethtx" to="0x0fd60D641FE2A2A9ff4eab75698612703BE172d7" data="$(encode_tx)"]
+
+    encode_data -> encode_tx -> submit_tx;
+
+"""
