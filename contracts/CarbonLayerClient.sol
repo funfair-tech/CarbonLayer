@@ -4,14 +4,14 @@ pragma solidity ^0.8.7;
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 
+enum Intensity { High, Medium, Low, Invalid }
 
 contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
+    //TODO
     uint256 private constant ORACLE_PAYMENT = (1 * LINK_DIVISIBILITY) / 10; // 0.1 * 10**18
     
-    enum Intensity { High, Medium, Low }
-
     // intensity
     Intensity public intensity;
 
@@ -37,8 +37,8 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
      * @dev LINK address in Sepolia network: 0x779877A7B0D9E8603169DdbD7836e478b4624789
      * @dev Check https://docs.chain.link/docs/link-token-contracts/ for LINK address for the right network
      */
-    constructor() ConfirmedOwner(msg.sender) {
-        setChainlinkToken(0x779877A7B0D9E8603169DdbD7836e478b4624789);
+    constructor(address _linkNetworkAddress) ConfirmedOwner(msg.sender) {
+        setChainlinkToken(_linkNetworkAddress);
     }
    
     // 
@@ -71,18 +71,24 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
         uint8 _biomass,
         uint8 _coal
     ) public recordChainlinkFulfillment(_requestId) {
-        emit RequestIntensityFulfilled(_requestId, _intensity);
-        intensity = _intensity;
-        biomass = _biomass;
-        coal = _coal;
+      Intensity parsedIntensity = parseIntensity(_intensity);
+      require(parsedIntensity != Intensity.Invalid, "Invalid intensity value");
+
+      emit RequestIntensityFulfilled(_requestId, _intensity);
+      intensity = parsedIntensity;
+      biomass = _biomass;
+      coal = _coal;
     }
 
     function fulfillIntensity(
         bytes32 _requestId,
         string memory _intensity
     ) public recordChainlinkFulfillment(_requestId) {
-        emit RequestIntensityFulfilled(_requestId, _intensity);
-        intensity = _intensity;
+      Intensity parsedIntensity = parseIntensity(_intensity);
+      require(parsedIntensity != Intensity.Invalid, "Invalid intensity value");
+
+      emit RequestIntensityFulfilled(_requestId, _intensity);
+      intensity = parsedIntensity;
     }
 
     function getChainlinkToken() public view returns (address) {
@@ -109,6 +115,22 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
             _callbackFunctionId,
             _expiration
         );
+    }
+
+  function parseIntensity(string memory _intensity) internal pure returns (Intensity) {
+        if (compareStrings(_intensity, "High")) {
+            return Intensity.High;
+        } else if (compareStrings(_intensity, "Medium")) {
+            return Intensity.Medium;
+        } else if (compareStrings(_intensity, "Low")) {
+            return Intensity.Low;
+        } else {
+            return Intensity.Invalid;
+        }
+    }
+
+    function compareStrings(string memory a, string memory b) internal pure returns (bool) {
+        return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
     }
 
     function stringToBytes32(string memory source)
