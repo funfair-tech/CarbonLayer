@@ -6,9 +6,9 @@ services:
     image: smartcontract/chainlink:2.6.0
     container_name: chainlink-sepolia-node
     volumes:
-      - .chainlink-sepolia/config.toml:/chainlink/config.toml
+      - ./chainlink-sepolia/config.toml:/chainlink/config.toml
       - ~/.chainlink/sepolia/secrets/secrets.toml:/chainlink/secrets.toml
-      - ~/.chainlink/sepolia/secrets/api.txt:/chainlink/.api
+      - ~/.chainlink/sepolia/secrets/api:/chainlink/api
     ports:
       - 6688:6688
     command:
@@ -19,7 +19,7 @@ services:
       - /chainlink/secrets.toml
       - start
       - -a
-      - /chainlink/.api
+      - /chainlink/api
     restart: unless-stopped
     stop_grace_period: 500s
     stop_signal: SIGINT
@@ -33,11 +33,11 @@ services:
     container_name: chainlink-sepolia-postgres
     volumes:
       - ~/.chainlink/sepolia/postgres:/var/lib/postgresql/data
-      - ~/.chainlink/sepolia/secrets/postgres_password.txt:/run/secrets/postgres-passwd
+      - ~/.chainlink/sepolia/secrets/postgres_password:/run/secrets/postgres-passwd
     ports:
       - 5432:5432
     environment:
-      POSTGRES_PASSWORD_FILE: NotTellingYou
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
       PGDATA: /var/lib/postgresql/data/pgdata
     restart: always
     stop_grace_period: 500s
