@@ -163,11 +163,13 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
     function parseIntensity(
         string memory _intensity
     ) internal pure returns (Intensity) {
-        if (compareStrings(_intensity, "High")) {
+        if (compareStrings(_intensity, "high")) {
             return Intensity.High;
-        } else if (compareStrings(_intensity, "Medium")) {
+        } else if (compareStrings(_intensity, "moderate")) {
             return Intensity.Medium;
-        } else if (compareStrings(_intensity, "Low")) {
+        } else if (compareStrings(_intensity, "low")) {
+            return Intensity.Low;
+        } else if (compareStrings(_intensity, "very low")) {
             return Intensity.Low;
         } else {
             return Intensity.Invalid;
