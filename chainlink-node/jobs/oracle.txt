@@ -2,7 +2,7 @@ name                = "Get UK Carbon generation mix"
 type                = "directrequest"
 schemaVersion       = 1
 evmChainID          = 11155111
-contractAddress     = "TBD" # operator address
+contractAddress     = "0xd3e4028bC6b50091112641b565bE049f535D6299" # operator address
 minIncomingConfirmations = 0
 
 observationSource   = """
@@ -95,7 +95,7 @@ observationSource   = """
     encode_tx       [type="ethabiencode"
                         abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                         data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"]
-    submit_tx       [type="ethtx" to="0x0fd60D641FE2A2A9ff4eab75698612703BE172d7" data="$(encode_tx)"]
+    submit_tx       [type="ethtx" to="0xd3e4028bC6b50091112641b565bE049f535D6299" data="$(encode_tx)"]
 
     encode_data -> encode_tx -> submit_tx;
 
