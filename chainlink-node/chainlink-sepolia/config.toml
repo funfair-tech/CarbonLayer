@@ -1,0 +1,17 @@
+[Log]
+Level = 'warn'
+
+[WebServer]
+AllowOrigins = '\*'
+SecureCookies = false
+
+[WebServer.TLS]
+HTTPSPort = 0
+
+[[EVM]]
+ChainID = '11155111'
+
+[[EVM.Nodes]]
+Name = 'Sepolia'
+WSURL = 'wss://ws.1.sepolia.geth.clients.funfair.io'
+HTTPURL = 'https://1.sepolia.geth.clients.funfair.io'
