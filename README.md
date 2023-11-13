@@ -2,6 +2,12 @@
 
 This project feeds carbon intensity data from the [National Grid](https://www.nationalgrid.com/uk) official [Carbon Intesity API](https://api.carbonintensity.org.uk/) to a carbon intensity consumer contract which exposes its state to be used as part of a composed stack enabling other contracts to limit compute to times of low carbon generation, in other words, services can run in eco mode.
 
+## Addresses
+| Contract | Address                                    |
+|----------|------------------------------------------- |
+| Operator | 0xd3e4028bC6b50091112641b565bE049f535D6299 |
+| Client   | 0xBC746B0Dca7d2F6c37120d7135AAce4a48835A3a |
+| Oracle   | ??? |
 
 
 ## Chainlink Node
