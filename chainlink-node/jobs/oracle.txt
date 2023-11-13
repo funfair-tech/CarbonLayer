@@ -15,26 +15,71 @@ observationSource   = """
 
     decode_log -> fetch
 
-    parse_biomass       [type="jsonparse" path="data/generationmix/fuel=biomass"];
-    parse_coal          [type="jsonparse" path="data/generationmix/fuel=coal"];
-    parse_imports       [type="jsonparse" path="data/generationmix/fuel=imports"];
-    parse_gas           [type="jsonparse" path="data/generationmix/fuel=gas"];
-    parse_nuclear       [type="jsonparse" path="data/generationmix/fuel=nuclear"];
-    parse_other         [type="jsonparse" path="data/generationmix/fuel=other"];
-    parse_hydro         [type="jsonparse" path="data/generationmix/fuel=hydro"];
-    parse_solar         [type="jsonparse" path="data/generationmix/fuel=solar"];
-    parse_wind          [type="jsonparse" path="data/generationmix/fuel=wind"];
+    // biomass
+    parse_0_fuel       [type="jsonparse" path="data,generationmix,0,fuel" lax=true];
+    parse_0_perc       [type="jsonparse" path="data,generationmix,0,perc" lax=true];
 
+    // coal
+    parse_1_fuel       [type="jsonparse" path="data,generationmix,1,fuel" lax=true];
+    parse_1_perc       [type="jsonparse" path="data,generationmix,1,perc" lax=true];
 
-    fetch -> parse_biomass -> encode_data
-    fetch -> parse_coal -> encode_data
-    fetch -> parse_imports -> encode_data
-    fetch -> parse_gas -> encode_data
-    fetch -> parse_nuclear -> encode_data
-    fetch -> parse_other -> encode_data
-    fetch -> parse_hydro -> encode_data
-    fetch -> parse_solar -> encode_data
-    fetch -> parse_wind -> encode_data
+    // imports
+    parse_2_fuel       [type="jsonparse" path="data,generationmix,2,fuel" lax=true];
+    parse_2_perc       [type="jsonparse" path="data,generationmix,2,perc" lax=true];
+
+    // gas
+    parse_3_fuel       [type="jsonparse" path="data,generationmix,3,fuel" lax=true];
+    parse_3_perc       [type="jsonparse" path="data,generationmix,3,perc" lax=true];
+
+    // nuclear
+    parse_4_fuel       [type="jsonparse" path="data,generationmix,4,fuel" lax=true];
+    parse_4_perc       [type="jsonparse" path="data,generationmix,4,perc" lax=true];
+
+    // other
+    parse_5_fuel       [type="jsonparse" path="data,generationmix,5,fuel" lax=true];
+    parse_5_perc       [type="jsonparse" path="data,generationmix,5,perc" lax=true];
+
+    // hydro
+    parse_6_fuel       [type="jsonparse" path="data,generationmix,6,fuel" lax=true];
+    parse_6_perc       [type="jsonparse" path="data,generationmix,6,perc" lax=true];
+
+    // solar
+    parse_7_fuel       [type="jsonparse" path="data,generationmix,7,fuel" lax=true];
+    parse_7_perc       [type="jsonparse" path="data,generationmix,7,perc" lax=true];
+
+    // wind
+    parse_8_fuel       [type="jsonparse" path="data,generationmix,8,fuel" lax=true];
+    parse_8_perc       [type="jsonparse" path="data,generationmix,8,perc" lax=true];
+
+    fetch -> parse_0_fuel -> encode_data
+    fetch -> parse_0_perc -> encode_data
+
+    fetch -> parse_1_fuel -> encode_data
+    fetch -> parse_1_perc -> encode_data
+
+    fetch -> parse_2_fuel -> encode_data
+    fetch -> parse_2_perc -> encode_data
+
+    fetch -> parse_2_fuel -> encode_data
+    fetch -> parse_2_perc -> encode_data
+
+    fetch -> parse_3_fuel -> encode_data
+    fetch -> parse_3_perc -> encode_data
+
+    fetch -> parse_4_fuel -> encode_data
+    fetch -> parse_4_perc -> encode_data
+
+    fetch -> parse_5_fuel -> encode_data
+    fetch -> parse_5_perc -> encode_data
+
+    fetch -> parse_6_fuel -> encode_data
+    fetch -> parse_6_perc -> encode_data
+
+    fetch -> parse_7_fuel -> encode_data
+    fetch -> parse_7_perc -> encode_data
+
+    fetch -> parse_8_fuel -> encode_data
+    fetch -> parse_8_perc -> encode_data
 
     encode_data [type="ethabiencode"
         abi="(bytes32 _requestId, int64 _currentNum, string _currentTitle,string _currentDescription)"
