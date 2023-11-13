@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "npx hardhat run scripts/deploy.ts --network sepolia",
+    "deploy:operator": "npx hardhat run scripts/deployOperator.ts --network sepolia",
+    "deploy:client": "npx hardhat run scripts/deployClient.ts --network sepolia"
   },
   "repository": {
     "type": "git",
@@ -21,6 +24,7 @@
     "hardhat": "^2.19.0"
   },
   "dependencies": {
-    "@chainlink/contracts": "^0.8.0"
+    "@chainlink/contracts": "^0.8.0",
+    "dotenv": "^16.3.1"
   }
 }
