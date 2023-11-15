@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
-import "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
+import '@chainlink/contracts/src/v0.8/ChainlinkClient.sol';
+import '@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol';
 
 enum Intensity {
     High,
@@ -25,7 +25,7 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
     // intensity
     Intensity public intensity;
 
-    mapping(string => FuelData) public fuelData;
+    mapping(string => uint16) public fuelData;
     // uint8 public biomass;
     // uint8 public coal;
     // uint8 public imports;
@@ -36,10 +36,8 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
     // uint8 public solar;
     // uint8 public wind;
 
-    event RequestIntensityFulfilled(
-        bytes32 indexed requestId,
-        string indexed intensity
-    );
+    event RequestIntensityFulfilled(bytes32 indexed requestId, string indexed intensity);
+    event RequestMixFulfilled(bytes32 indexed requestId);
 
     /**
      * Sepolia
@@ -51,10 +49,7 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
     }
 
     //
-    function requestIntensityDetails(
-        address _oracle,
-        string memory _jobId
-    ) public onlyOwner {
+    function requestIntensityDetails(address _oracle, string memory _jobId) public onlyOwner {
         Chainlink.Request memory req = buildChainlinkRequest(
             stringToBytes32(_jobId),
             address(this),
@@ -64,10 +59,7 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
         sendChainlinkRequestTo(_oracle, req, ORACLE_PAYMENT);
     }
 
-    function requestIntensity(
-        address _oracle,
-        string memory _jobId
-    ) public onlyOwner {
+    function requestIntensity(address _oracle, string memory _jobId) public onlyOwner {
         Chainlink.Request memory req = buildChainlinkRequest(
             stringToBytes32(_jobId),
             address(this),
@@ -79,20 +71,14 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
 
     function fulfillIntensityDetails(
         bytes32 _requestId,
-        string memory _intensity,
-        uint8 _biomass,
-        uint8 _coal
+        string[] memory _fuelNames,
+        uint16[] memory _fuelPercentages
     ) public recordChainlinkFulfillment(_requestId) {
-        Intensity parsedIntensity = parseIntensity(_intensity);
-        require(
-            parsedIntensity != Intensity.Invalid,
-            "Invalid intensity value"
-        );
+        for (uint i = 0; i < _fuelNames.length; i++) {
+            fuelData[_fuelNames[i]] = _fuelPercentages[i];
+        }
 
-        emit RequestIntensityFulfilled(_requestId, _intensity);
-        intensity = parsedIntensity;
-        fuelData["biomass"] = FuelData("biomass", _biomass);
-        fuelData["coal"] = FuelData("coal", _coal);
+        emit RequestMixFulfilled(_requestId);
     }
 
     function fulfillIntensity(
@@ -100,10 +86,7 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
         string memory _intensity
     ) public recordChainlinkFulfillment(_requestId) {
         Intensity parsedIntensity = parseIntensity(_intensity);
-        require(
-            parsedIntensity != Intensity.Invalid,
-            "Invalid intensity value"
-        );
+        require(parsedIntensity != Intensity.Invalid, 'Invalid intensity value');
 
         emit RequestIntensityFulfilled(_requestId, _intensity);
         intensity = parsedIntensity;
@@ -115,10 +98,7 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
 
     function withdrawLink() public onlyOwner {
         LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-        require(
-            link.transfer(msg.sender, link.balanceOf(address(this))),
-            "Unable to transfer"
-        );
+        require(link.transfer(msg.sender, link.balanceOf(address(this))), 'Unable to transfer');
     }
 
     function cancelRequest(
@@ -127,49 +107,30 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
         bytes4 _callbackFunctionId,
         uint256 _expiration
     ) public onlyOwner {
-        cancelChainlinkRequest(
-            _requestId,
-            _payment,
-            _callbackFunctionId,
-            _expiration
-        );
+        cancelChainlinkRequest(_requestId, _payment, _callbackFunctionId, _expiration);
     }
 
-    function aggregateGreenBrown()
-        public
-        view
-        returns (uint256 greenPerc, uint256 brownPerc)
-    {
-        string[2] memory greenGeneration = ["wind", "solar"];
-        string[7] memory brownGeneration = [
-            "gas",
-            "coal",
-            "biomass",
-            "nuclear",
-            "hydro",
-            "imports",
-            "other"
-        ];
+    // function aggregateGreenBrown() public view returns (uint256 greenPerc, uint256 brownPerc) {
+    //     string[2] memory greenGeneration = ['wind', 'solar'];
+    //     string[7] memory brownGeneration = ['gas', 'coal', 'biomass', 'nuclear', 'hydro', 'imports', 'other'];
 
-        for (uint256 i = 0; i < greenGeneration.length; i++) {
-            greenPerc += fuelData[greenGeneration[i]].perc;
-        }
+    //     for (uint256 i = 0; i < greenGeneration.length; i++) {
+    //         greenPerc += fuelData[greenGeneration[i]].perc;
+    //     }
 
-        for (uint256 i = 0; i < brownGeneration.length; i++) {
-            brownPerc += fuelData[brownGeneration[i]].perc;
-        }
-    }
+    //     for (uint256 i = 0; i < brownGeneration.length; i++) {
+    //         brownPerc += fuelData[brownGeneration[i]].perc;
+    //     }
+    // }
 
-    function parseIntensity(
-        string memory _intensity
-    ) internal pure returns (Intensity) {
-        if (compareStrings(_intensity, "high")) {
+    function parseIntensity(string memory _intensity) internal pure returns (Intensity) {
+        if (compareStrings(_intensity, 'high')) {
             return Intensity.High;
-        } else if (compareStrings(_intensity, "moderate")) {
+        } else if (compareStrings(_intensity, 'moderate')) {
             return Intensity.Medium;
-        } else if (compareStrings(_intensity, "low")) {
+        } else if (compareStrings(_intensity, 'low')) {
             return Intensity.Low;
-        } else if (compareStrings(_intensity, "very low")) {
+        } else if (compareStrings(_intensity, 'very low')) {
             return Intensity.Low;
         } else {
             return Intensity.Invalid;
@@ -177,24 +138,18 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
     }
 
     function isGreenFuel(string memory fuel) internal pure returns (bool) {
-        return (compareStrings(fuel, "wind") ||
-            compareStrings(fuel, "solar") ||
-            compareStrings(fuel, "hydro") ||
-            compareStrings(fuel, "nuclear") ||
-            compareStrings(fuel, "biomass"));
+        return (compareStrings(fuel, 'wind') ||
+            compareStrings(fuel, 'solar') ||
+            compareStrings(fuel, 'hydro') ||
+            compareStrings(fuel, 'nuclear') ||
+            compareStrings(fuel, 'biomass'));
     }
 
-    function compareStrings(
-        string memory a,
-        string memory b
-    ) internal pure returns (bool) {
-        return (keccak256(abi.encodePacked((a))) ==
-            keccak256(abi.encodePacked((b))));
+    function compareStrings(string memory a, string memory b) internal pure returns (bool) {
+        return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
     }
 
-    function stringToBytes32(
-        string memory source
-    ) private pure returns (bytes32 result) {
+    function stringToBytes32(string memory source) private pure returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {
             return 0x0;

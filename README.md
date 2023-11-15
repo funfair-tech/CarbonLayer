@@ -6,7 +6,7 @@ This project feeds carbon intensity data from the [National Grid](https://www.na
 | Contract | Address                                    |
 |----------|------------------------------------------- |
 | Operator | 0xd3e4028bC6b50091112641b565bE049f535D6299 |
-| Client   | 0x12cEe4C0750538Cef25E2d34f564e0809Ed60303 |
+| Client   | 0x75aB775A7ACaA6e2850b1C30d480C47b518a015F |
 | Oracle   | ??? |
 
 
