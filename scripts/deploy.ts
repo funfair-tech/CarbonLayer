@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat';
 
 async function main() {
-  const name = 'CarbonLayerClient';
+  const name = 'CarbonLayer';
 
   const contract = await ethers.deployContract(name, [process.env.SEPOLIA_LINK_ADDRESS]);
 

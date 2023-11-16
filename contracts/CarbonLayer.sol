@@ -16,7 +16,7 @@ struct FuelData {
     uint16 perc;
 }
 
-contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
+contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
     //TODO
@@ -91,9 +91,9 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
         intensity = parsedIntensity;
     }
 
-    function update(address _oracle, string memory _intensityIndicatorJobId, string memory _generationMixJobId) public onlyAuthorised {
+    function update(address _oracle, string memory _intensityIndexJobId, string memory _generationMixJobId) public onlyAuthorised {
         requestIntensityDetails(_oracle, _generationMixJobId);
-        requestIntensity(_oracle, _intensityIndicatorJobId);
+        requestIntensity(_oracle, _intensityIndexJobId);
     }
 
     function getChainlinkToken() public view returns (address) {
