@@ -1,4 +1,4 @@
-name                = "Get UK Carbon intensity"
+name                = "Get UK Carbon Intensity Index"
 type                = "directrequest"
 schemaVersion       = 1
 evmChainID          = 11155111

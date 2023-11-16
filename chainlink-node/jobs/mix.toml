@@ -1,7 +1,7 @@
+name = "Get UK Carbon Generation Mix" 
 contractAddress = "0xd3e4028bC6b50091112641b565bE049f535D6299" # operator address
 evmChainID = 11155111 
 minIncomingConfirmations = 0 
-name = "Get UK Carbon generation mix array" 
 schemaVersion = 1 
 type = "directrequest" 
 
