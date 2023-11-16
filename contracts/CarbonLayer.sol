@@ -79,21 +79,7 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
             }
         }
 
-        // remove old fuel data
-        for(uint i = 0; i < fuelKeys.length; i++) {
-            bool found = false;
-            for(uint j = 0; j < _fuelNames.length; j++) {
-                if(compareStrings(fuelKeys[i], _fuelNames[j])) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if(!found) {
-                delete fuelData[fuelKeys[i]];
-            }
-        }
-
+        removeOldKeys(_fuelNames);
         fuelKeys = _fuelNames;
 
         emit RequestGenerationMixFulfilled(_requestId);
@@ -179,6 +165,22 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         assembly {
             // solhint-disable-line no-inline-assembly
             result := mload(add(source, 32))
+        }
+    }
+
+    function removeOldKeys(string[] memory _fuelNames) internal {
+        for(uint i = 0; i < fuelKeys.length; i++) {
+            bool found = false;
+            for(uint j = 0; j < _fuelNames.length; j++) {
+                if(compareStrings(fuelKeys[i], _fuelNames[j])) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if(!found) {
+                delete fuelData[fuelKeys[i]];
+            }
         }
     }
 }
