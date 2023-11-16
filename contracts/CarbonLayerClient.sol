@@ -21,23 +21,22 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
 
     //TODO
     uint256 private constant ORACLE_PAYMENT = (1 * LINK_DIVISIBILITY) / 10; // 0.1 * 10**18
+    address public automationService;
 
     // intensity
     Intensity public intensity;
-
+    // fuelData keys: biomass, coal, imports, gas, nuclear, other, hedro, solar, wind
     mapping(string => uint16) public fuelData;
-    // uint8 public biomass;
-    // uint8 public coal;
-    // uint8 public imports;
-    // uint8 public gas;
-    // uint8 public nuclear;
-    // uint8 public other;
-    // uint8 public hydro;
-    // uint8 public solar;
-    // uint8 public wind;
+  
 
     event RequestIntensityFulfilled(bytes32 indexed requestId, string indexed intensity);
     event RequestMixFulfilled(bytes32 indexed requestId);
+
+    
+    modifier onlyAuthorised() {
+        require(msg.sender == automationService || msg.sender == owner(), "Not authorised");
+        _;
+    }
 
     /**
      * Sepolia
@@ -92,6 +91,11 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
         intensity = parsedIntensity;
     }
 
+    function update(address _oracle, string memory _intensityIndicatorJobId, string memory _generationMixJobId) public onlyAuthorised {
+        requestIntensityDetails(_oracle, _generationMixJobId);
+        requestIntensity(_oracle, _intensityIndicatorJobId);
+    }
+
     function getChainlinkToken() public view returns (address) {
         return chainlinkTokenAddress();
     }
@@ -99,6 +103,10 @@ contract CarbonLayerClient is ChainlinkClient, ConfirmedOwner {
     function withdrawLink() public onlyOwner {
         LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
         require(link.transfer(msg.sender, link.balanceOf(address(this))), 'Unable to transfer');
+    }
+
+    function setAutomationService(address _automationService) public onlyOwner {
+        automationService = _automationService;
     }
 
     function cancelRequest(
