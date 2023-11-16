@@ -22,6 +22,7 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
     Intensity public intensity;
     // fuelData keys: biomass, coal, imports, gas, nuclear, other, hedro, solar, wind
     mapping(string => uint16) public fuelData;
+    string[] fuelKeys;
 
     event RequestIndexFulfilled(bytes32 indexed requestId, string indexed index);
     event RequestGenerationMixFulfilled(bytes32 indexed requestId);
@@ -70,9 +71,16 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         string[] memory _fuelNames,
         uint16[] memory _fuelPercentages
     ) public recordChainlinkFulfillment(_requestId) {
+        require(_fuelNames.length == _fuelPercentages.length, 'Invalid fuel data');
+
         for (uint i = 0; i < _fuelNames.length; i++) {
-            fuelData[_fuelNames[i]] = _fuelPercentages[i];
+            if(!compareStrings(_fuelNames[i],'')) {
+                fuelData[_fuelNames[i]] = _fuelPercentages[i];
+            }
         }
+
+        removeOldKeys(_fuelNames);
+        fuelKeys = _fuelNames;
 
         emit RequestGenerationMixFulfilled(_requestId);
     }
@@ -157,6 +165,22 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         assembly {
             // solhint-disable-line no-inline-assembly
             result := mload(add(source, 32))
+        }
+    }
+
+    function removeOldKeys(string[] memory _fuelNames) internal {
+        for(uint i = 0; i < fuelKeys.length; i++) {
+            bool found = false;
+            for(uint j = 0; j < _fuelNames.length; j++) {
+                if(compareStrings(fuelKeys[i], _fuelNames[j])) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if(!found) {
+                delete fuelData[fuelKeys[i]];
+            }
         }
     }
 }
