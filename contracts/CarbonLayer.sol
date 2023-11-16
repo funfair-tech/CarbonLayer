@@ -11,15 +11,10 @@ enum Intensity {
     Invalid
 }
 
-struct FuelData {
-    string fuel;
-    uint16 perc;
-}
-
 contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
-    //TODO
+    //TODO: review 
     uint256 private constant ORACLE_PAYMENT = (1 * LINK_DIVISIBILITY) / 10; // 0.1 * 10**18
     address public automationService;
 
@@ -27,48 +22,50 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
     Intensity public intensity;
     // fuelData keys: biomass, coal, imports, gas, nuclear, other, hedro, solar, wind
     mapping(string => uint16) public fuelData;
-  
 
-    event RequestIntensityFulfilled(bytes32 indexed requestId, string indexed intensity);
-    event RequestMixFulfilled(bytes32 indexed requestId);
+    event RequestIndexFulfilled(bytes32 indexed requestId, string indexed index);
+    event RequestGenerationMixFulfilled(bytes32 indexed requestId);
 
-    
     modifier onlyAuthorised() {
-        require(msg.sender == automationService || msg.sender == owner(), "Not authorised");
+        require(msg.sender == automationService || msg.sender == owner(), 'Not authorised');
         _;
     }
 
-    /**
-     * Sepolia
-     * @dev LINK address in Sepolia network: 0x779877A7B0D9E8603169DdbD7836e478b4624789
-     * @dev Check https://docs.chain.link/docs/link-token-contracts/ for LINK address for the right network
-     */
     constructor(address _linkNetworkAddress) ConfirmedOwner(msg.sender) {
         setChainlinkToken(_linkNetworkAddress);
     }
 
-    //
-    function requestIntensityDetails(address _oracle, string memory _jobId) public onlyOwner {
+    function requestIndex(address _oracle, string memory _jobId) public onlyOwner {
         Chainlink.Request memory req = buildChainlinkRequest(
             stringToBytes32(_jobId),
             address(this),
-            this.fulfillIntensityDetails.selector
+            this.fulfillIndex.selector
         );
 
         sendChainlinkRequestTo(_oracle, req, ORACLE_PAYMENT);
     }
 
-    function requestIntensity(address _oracle, string memory _jobId) public onlyOwner {
+    function requestGenerationMix(address _oracle, string memory _jobId) public onlyOwner {
         Chainlink.Request memory req = buildChainlinkRequest(
             stringToBytes32(_jobId),
             address(this),
-            this.fulfillIntensity.selector
+            this.fulfillGenerationMix.selector
         );
 
         sendChainlinkRequestTo(_oracle, req, ORACLE_PAYMENT);
     }
 
-    function fulfillIntensityDetails(
+    function fulfillIndex(
+        bytes32 _requestId,
+        string memory _intensity
+    ) public recordChainlinkFulfillment(_requestId) {
+        Intensity parsedIntensity = parseIntensity(_intensity);
+        require(parsedIntensity != Intensity.Invalid, 'Invalid intensity value');
+        intensity = parsedIntensity;
+        emit RequestIndexFulfilled(_requestId, _intensity);
+    }
+
+    function fulfillGenerationMix(
         bytes32 _requestId,
         string[] memory _fuelNames,
         uint16[] memory _fuelPercentages
@@ -77,23 +74,16 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
             fuelData[_fuelNames[i]] = _fuelPercentages[i];
         }
 
-        emit RequestMixFulfilled(_requestId);
+        emit RequestGenerationMixFulfilled(_requestId);
     }
 
-    function fulfillIntensity(
-        bytes32 _requestId,
-        string memory _intensity
-    ) public recordChainlinkFulfillment(_requestId) {
-        Intensity parsedIntensity = parseIntensity(_intensity);
-        require(parsedIntensity != Intensity.Invalid, 'Invalid intensity value');
-
-        emit RequestIntensityFulfilled(_requestId, _intensity);
-        intensity = parsedIntensity;
-    }
-
-    function update(address _oracle, string memory _intensityIndexJobId, string memory _generationMixJobId) public onlyAuthorised {
-        requestIntensityDetails(_oracle, _generationMixJobId);
-        requestIntensity(_oracle, _intensityIndexJobId);
+    function update(
+        address _oracle,
+        string memory _intensityIndexJobId,
+        string memory _generationMixJobId
+    ) public onlyAuthorised {
+        requestGenerationMix(_oracle, _generationMixJobId);
+        requestIndex(_oracle, _intensityIndexJobId);
     }
 
     function getChainlinkToken() public view returns (address) {
@@ -118,6 +108,7 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         cancelChainlinkRequest(_requestId, _payment, _callbackFunctionId, _expiration);
     }
 
+    // TODO: ???
     // function aggregateGreenBrown() public view returns (uint256 greenPerc, uint256 brownPerc) {
     //     string[2] memory greenGeneration = ['wind', 'solar'];
     //     string[7] memory brownGeneration = ['gas', 'coal', 'biomass', 'nuclear', 'hydro', 'imports', 'other'];
