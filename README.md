@@ -2,37 +2,49 @@
 
 This project feeds carbon intensity data from the [National Grid](https://www.nationalgrid.com/uk) official [Carbon Intesity API](https://api.carbonintensity.org.uk/) to a carbon intensity consumer contract which exposes its state to be used as part of a composed stack enabling other contracts to limit compute to times of low carbon generation, in other words, services can run in eco mode.
 
-## Addresses
+## Sepolia Addresses
 | Contract        | Address                                    |
 |-----------------|------------------------------------------- |
 | Operator        | 0xd3e4028bC6b50091112641b565bE049f535D6299 |
-| Carbon Layer    | 0xfA5C9A056bdD4c05655e236628a8723708a67E2D |
+| Carbon Layer    | 0x8128e4b4667508d7D19B217db486fEF1921e419D |
+| Upkeep          | 0xFe7B5DB07b96Dff57A200cB8a34aAbc654C6aD66 |
 | Oracle          | ??? |
 
 
 ## Chainlink Node
 
-* Configure & launch a node according to the [docs](https://docs.chain.link/chainlink-nodes/v1/running-a-chainlink-node)
+* Configure & launch a node either:
+  * according to the [docs](https://docs.chain.link/chainlink-nodes/v1/running-a-chainlink-node), or
+  * following the [readme](./chainlink-node/README.md) for a docker compose setup. (Reccomended)   
 
-* Fund the node address (http://localhost:6688/keys)
+* Fund your node [address](http://localhost:6688/keys) with ETH
 
-* Add a new job according to the [docs](https://docs.chain.link/chainlink-nodes/v1/fulfilling-requests#add-a-job-to-the-node)  
+
+* Add the intesity.toml and mix.toml from [jobs](./chainlink-node/jobs/) 
 
 * **NOTE:** dont forget to set up a view role [docs](https://docs.chain.link/chainlink-nodes/v1/roles-and-access)
 
 ## Chainlink Data Feed
 
-* Deploy an operator contract according to the [docs](https://docs.chain.link/chainlink-nodes/v1/fulfilling-requests#setup-your-operator-contract)
+* Deploy an instance of the [operator](./contracts/Operator.sol) and save the address.
 
-* Deploy CarbonLayer.sol, referencing the testConsumer in the [docs](https://docs.chain.link/chainlink-nodes/v1/fulfilling-requests#create-a-request-to-your-node)
+* Deploy an instance of [CarbonLayer](./contracts/CarbonLayer.sol)
 
-* **NOTE:** consumer should have an onlyOracle modifier on fulfillOracleResponse
+* Fund **CarbonLayer** with Link. Each update costs 0.2 Link 
+
+* **NOTE:** TODO: investigate access control modifier on fulfillOracleResponse functions ???
 
 ## Chainlink Automation
 
 * Deploy and fund a new upkeep on [Chainlink Automation](https://automation.chain.link/) 
 
-* **NOTE:** update the state at a defined interval (frequency 30min)
+* Create a time interval based upkeep that points to **Carbon Layer**. The upkeep should call the `update` function with the **Operator** address and the job id's for `Get UK Carbon Intensity Index` & `Get UK Carbon Intensity Mix`. 
+
+* Copy the Upkeep address from the [Chainlink Automation](https://automation.chain.link/) dashboard and call `setAutomation` on **Carbon Layer** to authenticate the upkeep.
+
+
+* **NOTE:** gas limit should be >= 250,000
+* **NOTE:** api update interval = 30min 
 
 ## Chainlink CCIP
 

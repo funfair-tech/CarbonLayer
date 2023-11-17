@@ -16,7 +16,7 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
 
     //TODO: review 
     uint256 private constant ORACLE_PAYMENT = (1 * LINK_DIVISIBILITY) / 10; // 0.1 * 10**18
-    address public automationService;
+    address public automation;
 
     // intensity
     Intensity public intensity;
@@ -28,7 +28,7 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
     event RequestGenerationMixFulfilled(bytes32 indexed requestId);
 
     modifier onlyAuthorised() {
-        require(msg.sender == automationService || msg.sender == owner(), 'Not authorised');
+        require(msg.sender == automation || msg.sender == owner(), 'Not authorised');
         _;
     }
 
@@ -36,7 +36,7 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         setChainlinkToken(_linkNetworkAddress);
     }
 
-    function requestIndex(address _oracle, string memory _jobId) public onlyOwner {
+    function requestIndex(address _oracle, string memory _jobId) public onlyAuthorised {
         Chainlink.Request memory req = buildChainlinkRequest(
             stringToBytes32(_jobId),
             address(this),
@@ -46,7 +46,7 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         sendChainlinkRequestTo(_oracle, req, ORACLE_PAYMENT);
     }
 
-    function requestGenerationMix(address _oracle, string memory _jobId) public onlyOwner {
+    function requestGenerationMix(address _oracle, string memory _jobId) public onlyAuthorised {
         Chainlink.Request memory req = buildChainlinkRequest(
             stringToBytes32(_jobId),
             address(this),
@@ -103,8 +103,8 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         require(link.transfer(msg.sender, link.balanceOf(address(this))), 'Unable to transfer');
     }
 
-    function setAutomationService(address _automationService) public onlyOwner {
-        automationService = _automationService;
+    function setAutomation(address _automation) public onlyOwner {
+        automation = _automation;
     }
 
     function cancelRequest(
