@@ -28,6 +28,8 @@ This project feeds carbon intensity data from the [National Grid](https://www.na
 
 * Deploy an instance of the [operator](./contracts/Operator.sol) and save the address.
 
+* Set the node [address](http://localhost:6688/keys) as an authorised sender on the **Operator**
+
 * Deploy an instance of [CarbonLayer](./contracts/CarbonLayer.sol)
 
 * Fund **CarbonLayer** with Link. Each update costs 0.2 Link 
