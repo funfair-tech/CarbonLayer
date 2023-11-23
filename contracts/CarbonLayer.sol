@@ -5,22 +5,23 @@ import '@chainlink/contracts/src/v0.8/ChainlinkClient.sol';
 import '@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol';
 
 enum Intensity {
-    High,
-    Medium,
+    Invalid,
     Low,
-    Invalid
+    Medium,
+    High
 }
 
 contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
-    //TODO: review 
+    //TODO: review
     uint256 private constant ORACLE_PAYMENT = (1 * LINK_DIVISIBILITY) / 10; // 0.1 * 10**18
     address public automation;
 
-    // intensity
     Intensity public intensity;
-    // fuelData keys: biomass, coal, imports, gas, nuclear, other, hedro, solar, wind
+
+    string[] public carbonNeutralFuels;
+    string[] public carbonIntensiveFuels;
     mapping(string => uint16) public fuelData;
     string[] fuelKeys;
 
@@ -34,6 +35,8 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
 
     constructor(address _linkNetworkAddress) ConfirmedOwner(msg.sender) {
         setChainlinkToken(_linkNetworkAddress);
+        carbonNeutralFuels = ['biomass', 'nuclear', 'hydro', 'solar', 'wind'];
+        carbonIntensiveFuels = ['coal', 'gas', 'imports', 'other'];
     }
 
     function requestIndex(address _oracle, string memory _jobId) public onlyAuthorised {
@@ -56,10 +59,7 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         sendChainlinkRequestTo(_oracle, req, ORACLE_PAYMENT);
     }
 
-    function fulfillIndex(
-        bytes32 _requestId,
-        string memory _intensity
-    ) public recordChainlinkFulfillment(_requestId) {
+    function fulfillIndex(bytes32 _requestId, string memory _intensity) public recordChainlinkFulfillment(_requestId) {
         Intensity parsedIntensity = parseIntensity(_intensity);
         require(parsedIntensity != Intensity.Invalid, 'Invalid intensity value');
         intensity = parsedIntensity;
@@ -74,7 +74,7 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         require(_fuelNames.length == _fuelPercentages.length, 'Invalid fuel data');
 
         for (uint i = 0; i < _fuelNames.length; i++) {
-            if(!compareStrings(_fuelNames[i],'')) {
+            if (!compareStrings(_fuelNames[i], '')) {
                 fuelData[_fuelNames[i]] = _fuelPercentages[i];
             }
         }
@@ -107,6 +107,20 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         automation = _automation;
     }
 
+    function setCarbonNeutralFuels(string[] memory _carbonNeutralFuels) public onlyOwner {
+        require(_carbonNeutralFuels.length > 0, 'Replacement fuel keys cannot be empty');
+        carbonNeutralFuels = _carbonNeutralFuels;
+    }
+
+    function setCarbonIntensiveFuels(string[] memory _carbonIntensiveFuels) public onlyOwner {
+        require(_carbonIntensiveFuels.length > 0, 'Replacement fuel keys cannot be empty');
+        carbonIntensiveFuels = _carbonIntensiveFuels;
+    }
+
+    function getCarbonNeutralFuels() public view returns (string[] memory) {
+        return carbonNeutralFuels;
+    }
+
     function cancelRequest(
         bytes32 _requestId,
         uint256 _payment,
@@ -116,22 +130,10 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         cancelChainlinkRequest(_requestId, _payment, _callbackFunctionId, _expiration);
     }
 
-    // TODO: ???
-    // function aggregateGreenBrown() public view returns (uint256 greenPerc, uint256 brownPerc) {
-    //     string[2] memory greenGeneration = ['wind', 'solar'];
-    //     string[7] memory brownGeneration = ['gas', 'coal', 'biomass', 'nuclear', 'hydro', 'imports', 'other'];
-
-    //     for (uint256 i = 0; i < greenGeneration.length; i++) {
-    //         greenPerc += fuelData[greenGeneration[i]].perc;
-    //     }
-
-    //     for (uint256 i = 0; i < brownGeneration.length; i++) {
-    //         brownPerc += fuelData[brownGeneration[i]].perc;
-    //     }
-    // }
-
-    function parseIntensity(string memory _intensity) internal pure returns (Intensity) {
-        if (compareStrings(_intensity, 'high')) {
+    function parseIntensity(string memory _intensity) public pure returns (Intensity) {
+        if (compareStrings(_intensity, 'very high')) {
+            return Intensity.High;
+        } else if (compareStrings(_intensity, 'high')) {
             return Intensity.High;
         } else if (compareStrings(_intensity, 'moderate')) {
             return Intensity.Medium;
@@ -142,14 +144,6 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         } else {
             return Intensity.Invalid;
         }
-    }
-
-    function isGreenFuel(string memory fuel) internal pure returns (bool) {
-        return (compareStrings(fuel, 'wind') ||
-            compareStrings(fuel, 'solar') ||
-            compareStrings(fuel, 'hydro') ||
-            compareStrings(fuel, 'nuclear') ||
-            compareStrings(fuel, 'biomass'));
     }
 
     function compareStrings(string memory a, string memory b) internal pure returns (bool) {
@@ -169,16 +163,16 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
     }
 
     function removeOldKeys(string[] memory _fuelNames) internal {
-        for(uint i = 0; i < fuelKeys.length; i++) {
+        for (uint i = 0; i < fuelKeys.length; i++) {
             bool found = false;
-            for(uint j = 0; j < _fuelNames.length; j++) {
-                if(compareStrings(fuelKeys[i], _fuelNames[j])) {
+            for (uint j = 0; j < _fuelNames.length; j++) {
+                if (compareStrings(fuelKeys[i], _fuelNames[j])) {
                     found = true;
                     break;
                 }
             }
 
-            if(!found) {
+            if (!found) {
                 delete fuelData[fuelKeys[i]];
             }
         }
