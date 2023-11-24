@@ -4,7 +4,7 @@ pragma solidity ^0.8.7;
 import '@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol';
 import './CarbonLayer.sol';
 
-contract CarbonAware is ConfirmedOwner {
+contract CarbonAssert is ConfirmedOwner {
     
     CarbonLayer public carbonLayerInstance;
 
@@ -34,14 +34,14 @@ contract CarbonAware is ConfirmedOwner {
         _;
     }
 
-    modifier belowIntensityThreshold(string memory _threshold) {
+    modifier aboveIntensityThreshold(string memory _threshold) {
         require(address(carbonLayerInstance) != address(0), 'CarbonLayer instance not set');
 
         Intensity intensityThreshold = carbonLayerInstance.parseIntensity(_threshold);
         
         require(intensityThreshold != Intensity.Invalid, 'Invalid threshold');
 
-        require(carbonLayerInstance.intensity() < intensityThreshold, 'Carbon intensity index above threshold');
+        require(carbonLayerInstance.intensity() > intensityThreshold, 'Carbon intensity index above threshold');
 
         _;
     }
