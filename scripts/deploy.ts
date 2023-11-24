@@ -9,14 +9,18 @@ async function main() {
   const carbonLayer = await ethers.deployContract('CarbonLayer', [process.env.SEPOLIA_LINK_ADDRESS]);
   await carbonLayer.waitForDeployment();
 
-  const carbonAware = await ethers.deployContract('CarbonAware', [carbonLayer.target]);
-  await carbonAware.waitForDeployment();
+  const carbonAssert = await ethers.deployContract('CarbonAssert', [carbonLayer.target]);
+  await carbonAssert.waitForDeployment();
+
+  const carbonQuery = await ethers.deployContract('CarbonQuery', [carbonLayer.target]);
+  await carbonQuery.waitForDeployment();
   
   carbonLayer.setAutomation(process.env.UPKEEP_ADDRESS)
 
   console.log(`=============================================`);
   console.log(`CarbonLayer deployed to ${carbonLayer.target}`);
-  console.log(`CarbonAware deployed to ${carbonAware.target}`);
+  console.log(`CarbonAssert deployed to ${carbonAssert.target}`);
+  console.log(`CarbonQuery deployed to ${carbonQuery.target}`);
   console.log(`=============================================`);
 
 }
