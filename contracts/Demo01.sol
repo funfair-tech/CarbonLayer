@@ -44,10 +44,6 @@ contract Demo01 {
         threshold = _threshold;
     }
 
-    function getBalance() external view onlyOwner returns (uint256) {
-        return address(this).balance;
-    }
-
     function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
 
@@ -58,10 +54,17 @@ contract Demo01 {
         emit Withdraw("Fee withdraw processed", balance, owner);
     }
 
-    function doWork() external payable {
+    function quote() public view returns (uint256) {
         bool isCarbonNeutral = carbonQueryInstance.carbonNeutralPowered(threshold);
         
         uint256 fee = isCarbonNeutral ? reducedFee : standardFee;
+
+        return fee;
+    }
+
+    function doWork() external payable {
+        
+        uint256 fee = quote();
 
         require(msg.value >= fee, "Insufficient fee attached");
 
