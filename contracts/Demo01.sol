@@ -12,6 +12,7 @@ contract Demo01 {
 
     event CarbonQueryInstanceSet(address indexed _carbonQueryAddress);
     event Working(string indexed _msg, uint256 indexed fee);
+    event Refunding(string indexed _msg, uint256 indexed fee);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Not the owner");
@@ -49,12 +50,18 @@ contract Demo01 {
 
         require(msg.value >= fee, "Insufficient fee attached");
 
-        // Perform call to external server here...
+        // TODO: Perform call to external server here...
         emit Working("Demo01 is working for a fee of ", fee);
 
         // Transfer the excess funds back to the caller
         if (msg.value > fee) {
-            payable(msg.sender).transfer(msg.value - fee);
+            // In Solidity versions 0.8.0 and later, 
+            // the SafeMath library functions are part of the standard arithmetic operations for uint256.
+            uint256 refund = msg.value - fee;
+            payable(msg.sender).transfer(refund);
+
+            emit Refunding("Refunding exess fee to caller", refund);
+
         }
     }
 
