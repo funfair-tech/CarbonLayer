@@ -13,6 +13,7 @@ contract Demo01 {
     event CarbonQueryInstanceSet(address indexed _carbonQueryAddress);
     event Working(string indexed _msg, uint256 indexed fee);
     event Refunding(string indexed _msg, uint256 indexed fee);
+    event Withdraw(string indexed _msg, uint256 indexed fee, address indexed recipient);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Not the owner");
@@ -41,6 +42,20 @@ contract Demo01 {
 
     function setTreshold(uint16 _threshold) external onlyOwner {
         threshold = _threshold;
+    }
+
+    function getBalance() external view onlyOwner returns (uint256) {
+        return address(this).balance;
+    }
+
+    function withdraw() external onlyOwner {
+        uint256 balance = address(this).balance;
+
+        require(balance > 0, "No funds to withdraw");
+
+        payable(owner).transfer(balance);
+
+        emit Withdraw("Fee withdraw processed", balance, owner);
     }
 
     function doWork() external payable {
