@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.7;
 
-import {IDynamicFeeManager} from "@uniswap/v4-core/contracts/interfaces/IDynamicFeeManager.sol";
-import {IPoolManager} from "@uniswap/v4-core/contracts/interfaces/IPoolManager.sol";
-import {Hooks} from "@uniswap/v4-core/contracts/libraries/Hooks.sol";
-import {PoolKey, PoolIdLibrary} from "@uniswap/v4-core/contracts/types/PoolId.sol";
-import {BalanceDelta} from "@uniswap/v4-core/contracts/types/BalanceDelta.sol";
-import {BaseHook} from "@uniswap/v4-periphery/contracts/BaseHook.sol";
+import {IDynamicFeeManager} from "https://github.com/Uniswap/v4-core/src/interfaces/IDynamicFeeManager.sol";
+import {IPoolManager} from "https://github.com/Uniswap/v4-core/src/interfaces/IPoolManager.sol";
+import {Hooks} from "https://github.com/Uniswap/v4-core/src/libraries/Hooks.sol";
+import {PoolKey, PoolIdLibrary} from "https://github.com/Uniswap/v4-core/src/types/PoolId.sol";
+import {BalanceDelta} from "https://github.com/Uniswap/v4-core/src/types/BalanceDelta.sol";
+import {BaseHook} from "https://github.com/Uniswap/v4-periphery/contracts/BaseHook.sol";
 import './CarbonQuery.sol';
 
 contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager {
@@ -52,23 +52,25 @@ contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager {
         return Hooks.Calls({
             beforeInitialize: false,
             afterInitialize: false,
+
             beforeModifyPosition: false,
             afterModifyPosition: false,
+
             beforeSwap: false,
             afterSwap: false,
+
             beforeDonate: false,
-            afterDonate: false
+            afterDonate: false,
+            noOp: false
         });
     }
 
-    function getFee(address sender, PoolKey calldata key, IPoolManager.SwapParams calldata params, bytes calldata data)
-    external
-    returns (uint24 fee)
-    {
+    function getFee(address /*sender*/, PoolKey calldata /*key*/) external view returns (uint24 fee)     {
         bool isCarbonNeutral = carbonQueryInstance.carbonNeutralPowered(threshold);
 
-        uint256 fee = isCarbonNeutral ? reducedFee : standardFee;
+        uint256 result = isCarbonNeutral ? reducedFee : standardFee;
 
-        return fee;
+        return uint24(result);
+
     }
 }
