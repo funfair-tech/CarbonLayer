@@ -9,6 +9,7 @@ import {BalanceDelta} from "https://github.com/Uniswap/v4-core/src/types/Balance
 import {BaseHook} from "https://github.com/Uniswap/v4-periphery/contracts/BaseHook.sol";
 import './CarbonQuery.sol';
 
+// Discount pool fees for pools that involve real world asset tokens that track energy providers
 contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager {
     using PoolIdLibrary for PoolKey;
     address public owner;
