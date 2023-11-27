@@ -40,7 +40,7 @@ contract Demo01 {
         reducedFee = _reducedFee;
     }
 
-    function setTreshold(uint16 _threshold) external onlyOwner {
+    function setThreshold(uint16 _threshold) external onlyOwner {
         threshold = _threshold;
     }
 
