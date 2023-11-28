@@ -1,21 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
+import '../../contracts/CarbonQuery.sol';
+
 import { FunctionsClient } from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/FunctionsClient.sol";
 import { ConfirmedOwner } from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import { FunctionsRequest } from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
 
-/**
- * Request testnet LINK and ETH here: https://faucets.chain.link/
- * Find information on LINK Token Contracts and get the latest ETH and LINK faucets here: https://docs.chain.link/resources/link-token-contracts/
- */
 
 /**
- * @title GettingStartedFunctionsConsumer
- * @notice This is an example contract to show how to make HTTP requests using Chainlink
- * @dev This contract uses hardcoded values and should not be used in production.
+ * @title FunctionClient
+ * @notice This is an example contract to show how to make HTTP requests using CarbonLayer
  */
-contract LambdaFunctionsClient is FunctionsClient, ConfirmedOwner {
+contract FunctionClient is FunctionsClient, ConfirmedOwner {
     using FunctionsRequest for FunctionsRequest.Request;
 
     // State variables to store the last request ID, response, and error
@@ -23,10 +20,20 @@ contract LambdaFunctionsClient is FunctionsClient, ConfirmedOwner {
     bytes public s_lastResponse;
     bytes public s_lastError;
 
-    // Custom error type
-    error UnexpectedRequestID(bytes32 requestId);
+    // State variables to store the fees and energy source threshold
+    uint256 public standardFee = 0.002 ether;
+    uint256 public reducedFee = 0.001 ether;
+    uint16 public threshold = 3000;
+    CarbonQuery public carbonQueryInstance;
 
-    // Event to log responses
+    // Errors
+    error UnexpectedRequestID(bytes32 requestId);
+    
+    // Events
+    event CarbonQueryInstanceSet(address indexed _carbonQueryAddress);
+    event Working(string indexed _msg, uint256 indexed fee);
+    event Refunding(string indexed _msg, uint256 indexed fee);
+    event Withdraw(string indexed _msg, uint256 indexed fee, address indexed recipient);
     event Response(
         bytes32 indexed requestId,
         string character,
@@ -37,7 +44,7 @@ contract LambdaFunctionsClient is FunctionsClient, ConfirmedOwner {
     // Router address - Hardcoded for Mumbai
     // TODO: move to constructor
     // Check to get the router address for your supported network https://docs.chain.link/chainlink-functions/supported-networks
-    address router = 0x6E2dc0F9DB014aE19888F539E59285D2Ea04244C;
+    address router = 0xb83E47C2bC239B3bf370bc41e1459A34b41238D0;
 
     // JavaScript source code
     // Trigger an AWS lambda function.
@@ -60,7 +67,7 @@ contract LambdaFunctionsClient is FunctionsClient, ConfirmedOwner {
     // TODO: move to constructor
     // Check to get the donID for your supported network https://docs.chain.link/chainlink-functions/supported-networks
     bytes32 donID =
-        0x66756e2d706f6c79676f6e2d6d756d6261692d31000000000000000000000000;
+        0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000;
 
     // State variable to store the returned character information
     string public character;
@@ -68,7 +75,67 @@ contract LambdaFunctionsClient is FunctionsClient, ConfirmedOwner {
     /**
      * @notice Initializes the contract with the Chainlink router address and sets the contract owner
      */
-    constructor() FunctionsClient(router) ConfirmedOwner(msg.sender) {}
+    constructor(address _carbonQueryAddress) FunctionsClient(router) ConfirmedOwner(msg.sender) {
+        setCarbonQuery(_carbonQueryAddress);
+    }
+
+    function setCarbonQuery(address _carbonQueryAddress) public onlyOwner {
+        require(_carbonQueryAddress != address(0), 'Invalid CarbonQuery address');
+
+        carbonQueryInstance = CarbonQuery(_carbonQueryAddress);
+
+        emit CarbonQueryInstanceSet(_carbonQueryAddress);
+    }
+
+
+    function setFees(uint256 _standardFee, uint256 _reducedFee) external onlyOwner {
+        standardFee = _standardFee;
+        reducedFee = _reducedFee;
+    }
+
+    function setTreshold(uint16 _threshold) external onlyOwner {
+        threshold = _threshold;
+    }
+
+    function withdraw() external onlyOwner {
+        uint256 balance = address(this).balance;
+
+        require(balance > 0, "No funds to withdraw");
+
+        payable(owner()).transfer(balance);
+
+        emit Withdraw("Fee withdraw processed", balance, owner());
+    }
+
+    function doWork(uint64 _subscriptionID, string[] calldata _args) external payable {
+        
+        uint256 fee = quote();
+
+        require(msg.value >= fee, "Insufficient fee attached");
+
+        sendRequest(_subscriptionID, _args);
+        
+        emit Working("Demo01 is doing work for a fee of ", fee);
+
+        // Transfer the excess funds back to the caller
+        if (msg.value > fee) {
+            // In Solidity versions 0.8.0 and later, 
+            // the SafeMath library functions are part of the standard arithmetic operations for uint256.
+            uint256 refund = msg.value - fee;
+            payable(msg.sender).transfer(refund);
+
+            emit Refunding("Refunding exess fee to caller", refund);
+
+        }
+    }
+
+    function quote() public view returns (uint256) {
+        bool isCarbonNeutral = carbonQueryInstance.carbonNeutralPowered(threshold);
+        
+        uint256 fee = isCarbonNeutral ? reducedFee : standardFee;
+
+        return fee;
+    }
 
     /**
      * @notice Sends an HTTP request for character information
@@ -79,7 +146,7 @@ contract LambdaFunctionsClient is FunctionsClient, ConfirmedOwner {
     function sendRequest(
         uint64 subscriptionId,
         string[] calldata args
-    ) external onlyOwner returns (bytes32 requestId) {
+    ) private onlyOwner returns (bytes32 requestId) {
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(source); // Initialize the request with JS code
         if (args.length > 0) req.setArgs(args); // Set the arguments for the request
