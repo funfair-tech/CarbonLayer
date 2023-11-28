@@ -41,10 +41,10 @@ contract FunctionClient is FunctionsClient, ConfirmedOwner {
         bytes err
     );
 
-    // Router address - Hardcoded for Mumbai
-    // TODO: move to constructor
-    // Check to get the router address for your supported network https://docs.chain.link/chainlink-functions/supported-networks
+    // Chaink link fixed Router address and donID - Hardcoded for Sepolia, make adjustable to use in production 
+    // Addresses supported network https://docs.chain.link/chainlink-functions/supported-networks
     address router = 0xb83E47C2bC239B3bf370bc41e1459A34b41238D0;
+    bytes32 donID = 0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000;
 
     // JavaScript source code
     // Trigger an AWS lambda function.
@@ -63,12 +63,6 @@ contract FunctionClient is FunctionsClient, ConfirmedOwner {
     //Callback gas limit
     uint32 gasLimit = 300000;
 
-    // donID - Hardcoded for Mumbai
-    // TODO: move to constructor
-    // Check to get the donID for your supported network https://docs.chain.link/chainlink-functions/supported-networks
-    bytes32 donID =
-        0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000;
-
     // State variable to store the returned character information
     string public character;
 
@@ -79,6 +73,9 @@ contract FunctionClient is FunctionsClient, ConfirmedOwner {
         setCarbonQuery(_carbonQueryAddress);
     }
 
+    /**
+     * @notice Admin functions to control the fees
+     */
     function setCarbonQuery(address _carbonQueryAddress) public onlyOwner {
         require(_carbonQueryAddress != address(0), 'Invalid CarbonQuery address');
 
