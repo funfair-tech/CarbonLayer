@@ -1,6 +1,6 @@
-const { GPU } = require('gpu.js');
+import * as GPU from 'gpu.js';
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
     const startTime = Date.now();
 
     // Simulate GPU-like rendering with gpu.js
