@@ -73,7 +73,7 @@ The payment contract impliments CarbonLayer to source the fuel generation mix an
 * Follow the [Managing CL Functions Subscriptions guide](https://docs.chain.link/chainlink-functions/resources/subscriptions#create-a-subscriptio) and make a note of your subscription id. 
 * Add the address as a comsumer of your [Chainlink Functions](https://functions.chain.link/) subscription.
 * Configure the CarbonLayer renewable energy threshold for your use case using setTreshold, eg. `setTreshold(500)` sets a requirement for a 50% renewable energy source.
-* Configure the standard and reduced fees using setFees, eg. setFees(2000000000000000, 1000000000000000) sets a fee of 0.002 ETH and a reduced fee of 0.001 ETH.
+* Configure the standard and reduced fees using setFees, eg. `setFees(2000000000000000, 1000000000000000)` sets a fee of 0.002 ETH and a reduced fee of 0.001 ETH.
 
 ### Uniswap Hook
 **TODO:** create a uniswap v4 hook to demonstrate disabling a pool during times of peek carbon intensity

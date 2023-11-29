@@ -12,7 +12,7 @@ import { FunctionsRequest } from "@chainlink/contracts/src/v0.8/functions/dev/v1
  * @title FunctionClient
  * @notice This is an example contract to show how to make HTTP requests using CarbonLayer
  */
-contract FunctionClient is FunctionsClient, ConfirmedOwner {
+contract CarbonCompute is FunctionsClient, ConfirmedOwner {
     using FunctionsRequest for FunctionsRequest.Request;
 
     // State variables to store the last request ID, response, and error
@@ -52,7 +52,7 @@ contract FunctionClient is FunctionsClient, ConfirmedOwner {
     string source =
         "const characterId = args[0];"
         "const apiResponse = await Functions.makeHttpRequest({"
-        "url: `https://swapi.dev/api/people/${characterId}/`"
+        "url: `https://v2nnosvq76yihfm2mxk7bvep2q0jtnrl.lambda-url.eu-west-2.on.aws/`"
         "});"
         "if (apiResponse.error) {"
         "throw Error('Request failed');"
