@@ -14,16 +14,15 @@ enum Intensity {
 contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
-    //TODO: review
-    uint256 private constant ORACLE_PAYMENT = (1 * LINK_DIVISIBILITY) / 10; // 0.1 * 10**18
-    address public automation;
+    uint256 private ORACLE_PAYMENT = 1000000000000000; // LINK Joules
 
     Intensity public intensity;
 
+    address public automation;
     string[] public carbonNeutralFuels;
     string[] public carbonIntensiveFuels;
-    mapping(string => uint16) public fuelData;
-    string[] fuelKeys;
+    string[] public fuelNames;
+    uint16[] public fuelPercentages;
 
     event RequestIndexFulfilled(bytes32 indexed requestId, string indexed index);
     event RequestGenerationMixFulfilled(bytes32 indexed requestId);
@@ -73,14 +72,8 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
     ) public recordChainlinkFulfillment(_requestId) {
         require(_fuelNames.length == _fuelPercentages.length, 'Invalid fuel data');
 
-        for (uint i = 0; i < _fuelNames.length; i++) {
-            if (!compareStrings(_fuelNames[i], '')) {
-                fuelData[_fuelNames[i]] = _fuelPercentages[i];
-            }
-        }
-
-        removeOldKeys(_fuelNames);
-        fuelKeys = _fuelNames;
+        fuelNames = _fuelNames;
+        fuelPercentages = _fuelPercentages;
 
         emit RequestGenerationMixFulfilled(_requestId);
     }
@@ -112,13 +105,38 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         carbonNeutralFuels = _carbonNeutralFuels;
     }
 
+    function getCarbonNeutralFuels() public view returns (string[] memory) {
+        return carbonNeutralFuels;
+    }
+
     function setCarbonIntensiveFuels(string[] memory _carbonIntensiveFuels) public onlyOwner {
         require(_carbonIntensiveFuels.length > 0, 'Replacement fuel keys cannot be empty');
         carbonIntensiveFuels = _carbonIntensiveFuels;
     }
 
-    function getCarbonNeutralFuels() public view returns (string[] memory) {
-        return carbonNeutralFuels;
+    function getCarbonIntensiveFuels() public view returns (string[] memory) {
+        return carbonIntensiveFuels;
+    }
+
+    function getFuelPercentage(string memory _fuelName) public view returns (uint16) {
+        require(fuelNames.length > 0, "No fuel data available");
+
+        for (uint256 i = 0; i < fuelNames.length; i++) {
+            if (compareStrings(fuelNames[i], _fuelName)) {
+                return fuelPercentages[i];
+            }
+        }
+
+        return 0;
+    }
+
+    function setOraclePayment(uint256 _joules) public onlyOwner {
+        require(_joules > 0, 'Payment cannot be zero');
+        ORACLE_PAYMENT = _joules;
+    }
+
+    function getOraclePayment() public view returns (uint256) {
+        return ORACLE_PAYMENT;
     }
 
     function cancelRequest(
@@ -162,19 +180,4 @@ contract CarbonLayer is ChainlinkClient, ConfirmedOwner {
         }
     }
 
-    function removeOldKeys(string[] memory _fuelNames) internal {
-        for (uint i = 0; i < fuelKeys.length; i++) {
-            bool found = false;
-            for (uint j = 0; j < _fuelNames.length; j++) {
-                if (compareStrings(fuelKeys[i], _fuelNames[j])) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                delete fuelData[fuelKeys[i]];
-            }
-        }
-    }
 }

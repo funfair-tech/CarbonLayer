@@ -24,7 +24,7 @@ contract CarbonQuery is ConfirmedOwner {
     function isSolarPowered(uint16 _threshold) external view returns (bool) {
         require(address(carbonLayerInstance) != address(0), 'CarbonLayer instance not set');
 
-        uint16 percentageSolarFuel = carbonLayerInstance.fuelData('solar');
+        uint16 percentageSolarFuel = carbonLayerInstance.getFuelPercentage('solar');
 
         return percentageSolarFuel > _threshold;
     }
@@ -37,7 +37,7 @@ contract CarbonQuery is ConfirmedOwner {
         string[] memory carbonNeutralFuels = carbonLayerInstance.getCarbonNeutralFuels();
 
         for (uint256 i = 0; i < carbonNeutralFuels.length; i++) {
-            perecentageRenewableFuel += carbonLayerInstance.fuelData(carbonNeutralFuels[i]);
+            perecentageRenewableFuel += carbonLayerInstance.getFuelPercentage(carbonNeutralFuels[i]);
         }
 
         return perecentageRenewableFuel > _threshold;

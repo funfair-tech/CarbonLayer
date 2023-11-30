@@ -1,6 +1,7 @@
 name = "Get UK Carbon Generation Mix" 
 contractAddress = "0xd3e4028bC6b50091112641b565bE049f535D6299" # operator address
 evmChainID = 11155111 
+minContractPaymentLinkJuels = "100000000000000"
 minIncomingConfirmations = 0 
 schemaVersion = 1 
 type = "directrequest" 

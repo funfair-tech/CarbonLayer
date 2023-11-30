@@ -3,6 +3,7 @@ type                = "directrequest"
 schemaVersion       = 1
 evmChainID          = 11155111
 contractAddress     = "0xd3e4028bC6b50091112641b565bE049f535D6299" # operator address
+minContractPaymentLinkJuels = "100000000000000"
 minIncomingConfirmations = 0
 
 observationSource   = """
