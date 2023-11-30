@@ -148,7 +148,6 @@ contract CarbonCompute is FunctionsClient, ConfirmedOwner {
     // Call an AWS lambda function and return the result
     // Documentation: https://aws.amazon.com/lambda/resources/?aws-lambda-resources-blog.sort-by=item.additionalFields.createdDate&aws-lambda-resources-blog.sort-order=desc
     string source =
-        "const characterId = args[0];"
         "const apiResponse = await Functions.makeHttpRequest({"
         "url: `https://v2nnosvq76yihfm2mxk7bvep2q0jtnrl.lambda-url.eu-west-2.on.aws/`"
         "});"
@@ -168,7 +167,7 @@ contract CarbonCompute is FunctionsClient, ConfirmedOwner {
     function sendRequest(
         uint64 subscriptionId,
         string[] calldata args
-    ) private onlyOwner returns (bytes32 requestId) {
+    ) private returns (bytes32 requestId) {
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(source); // Initialize the request with JS code
         if (args.length > 0) req.setArgs(args); // Set the arguments for the request
