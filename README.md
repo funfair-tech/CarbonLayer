@@ -12,6 +12,7 @@ This project feeds carbon intensity data from the [National Grid](https://www.na
 | Upkeep          | 0xFe7B5DB07b96Dff57A200cB8a34aAbc654C6aD66 |
 | Oracle Node     | 0x44A1542d44df86f7AC5Fed208cc77D39E6F18eC0 |
 | Carbon Compute  | 0xcc60eD9BF0Ab6F4234e57F18AbCaAaACcA799627 |
+| Carbon Stats    | 0x1D2C03688D0777F4A1De327c7fA76d454B4e8a62 |
 | ~~Demo01~~      |~~0x9C30040ECAD7f2E39073fa7f40F8F91528FE5c95~~|
 
 
