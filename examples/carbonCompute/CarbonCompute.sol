@@ -109,9 +109,8 @@ contract CarbonCompute is FunctionsClient, ConfirmedOwner {
    /**
      * @notice The main public entry point to the contract
      * @param _subscriptionID The Chainlink link subscription to use
-     * @param _args arguments to be passed to the called lambda funtion
      */
-    function doWork(uint64 _subscriptionID, string[] calldata _args) external payable {
+    function doWork(uint64 _subscriptionID) external payable {
         
         // Get the fee we're going to charge for this work       
         uint256 fee = quote();
@@ -119,7 +118,7 @@ contract CarbonCompute is FunctionsClient, ConfirmedOwner {
         require(msg.value >= fee, "Insufficient fee attached");
 
         // Call the lambda function 
-        sendRequest(_subscriptionID, _args);
+        sendRequest(_subscriptionID);
         
         emit Working("CarbonCompute doing work for a fee of ", fee);
 
@@ -161,16 +160,13 @@ contract CarbonCompute is FunctionsClient, ConfirmedOwner {
     /**
      * @notice Sends an HTTP request
      * @param subscriptionId The ID for the Chainlink subscription
-     * @param args The arguments to pass to the HTTP request
      * @return requestId The ID of the request
      */
     function sendRequest(
-        uint64 subscriptionId,
-        string[] calldata args
+        uint64 subscriptionId
     ) private returns (bytes32 requestId) {
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(source); // Initialize the request with JS code
-        if (args.length > 0) req.setArgs(args); // Set the arguments for the request
 
         // Send the request and store the request ID
         lastRequestId = _sendRequest(
