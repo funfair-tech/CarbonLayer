@@ -32,15 +32,15 @@ contract CarbonQuery is ConfirmedOwner {
     function carbonNeutralPowered(uint16 _threshold) external view returns (bool) {
         require(address(carbonLayerInstance) != address(0), 'CarbonLayer instance not set');
 
-        uint16 perecentageRenewableFuel = 0;
+        uint16 percentageRenewableFuel = 0;
 
         string[] memory carbonNeutralFuels = carbonLayerInstance.getCarbonNeutralFuels();
 
         for (uint256 i = 0; i < carbonNeutralFuels.length; i++) {
-            perecentageRenewableFuel += carbonLayerInstance.getFuelPercentage(carbonNeutralFuels[i]);
+            percentageRenewableFuel += carbonLayerInstance.getFuelPercentage(carbonNeutralFuels[i]);
         }
 
-        return perecentageRenewableFuel > _threshold;
+        return percentageRenewableFuel > _threshold;
     }
 
     function aboveIntensityThreshold(string memory _threshold) external view returns (bool) {
