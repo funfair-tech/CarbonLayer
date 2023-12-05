@@ -19,7 +19,7 @@ contract CarbonCompute is FunctionsClient, ConfirmedOwner {
     // State variables to store the fees and energy source threshold where the reduced fee is charged
     uint256 public standardFee = 0.002 ether;
     uint256 public reducedFee = 0.001 ether;
-    uint16 public threshold = 3000; // Above this is reduced fees are charged (TODO! unit?)
+    uint16 public threshold = 3000; // Above this is reduced fees are charged, units are percentage * 100
     CarbonQuery public carbonQueryInstance; // The contract to call to get the current carbon index
  
     // State variables to store the last request ID, response, and error returned from the lambda function call
