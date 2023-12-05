@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
+import { ConfirmedOwner } from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import {IDynamicFeeManager} from "https://github.com/Uniswap/v4-core/src/interfaces/IDynamicFeeManager.sol";
 import {IPoolManager} from "https://github.com/Uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {Hooks} from "https://github.com/Uniswap/v4-core/src/libraries/Hooks.sol";
@@ -10,13 +11,12 @@ import {BaseHook} from "https://github.com/Uniswap/v4-periphery/contracts/BaseHo
 import '../../contracts/CarbonQuery.sol';
 
 /**
- * @title FunctionClient
+ * @title GreenDiscountFeeHook
  * @notice This is an example contract to show how CarbonLayer could be used with Uniswap V4 Pools that involve RWA's
  *      charge a fee dependent on the current state of energy production
  */
-contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager {
+contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager, ConfirmedOwner {
     using PoolIdLibrary for PoolKey;
-    address public owner;
     uint256 public standardFee = 3000;
     uint256 public reducedFee = 1000;
     uint16 public threshold = 3000;
@@ -25,19 +25,12 @@ contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager {
     // Events
     event CarbonQueryInstanceSet(address indexed _carbonQueryAddress);
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not the owner");
-        _;
-    }
-
     /**
      * @notice Initializes the contract with the carbon query address and sets the contract owner
      * @param _poolManager The address of the Uniswap V4 pool manager contract
      * @param _carbonQueryAddress The address of the contract to call to get the current carbon index
      */
-    constructor(IPoolManager _poolManager, address _carbonQueryAddress) BaseHook(_poolManager) {
-
-        owner = msg.sender;
+    constructor(IPoolManager _poolManager, address _carbonQueryAddress) BaseHook(_poolManager) ConfirmedOwner(msg.sender){
         setCarbonQuery(_carbonQueryAddress);
     }
 
@@ -71,6 +64,10 @@ contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager {
         threshold = _threshold;
     }
 
+
+    /**
+     * @notice Gets the hooks that this overrides
+     */
     function getHooksCalls() public pure override returns (Hooks.Calls memory) {
         return Hooks.Calls({
             beforeInitialize: false,
@@ -88,12 +85,15 @@ contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager {
         });
     }
 
-    function getFee(address /*sender*/, PoolKey calldata /*key*/) external view returns (uint24 fee)     {
+    /**
+     * @notice The dynamic fee manager determines fees for pools
+     * @dev note that this pool is only called if the PoolKey fee value is equal to the DYNAMIC_FEE magic value
+     */
+    function getFee(address /*sender*/, PoolKey calldata /*key*/) external view returns (uint24 fee) {
         bool isCarbonNeutral = carbonQueryInstance.carbonNeutralPowered(threshold);
 
         uint256 result = isCarbonNeutral ? reducedFee : standardFee;
 
         return uint24(result);
-
     }
 }

@@ -11,9 +11,9 @@ contract CarbonAssert is ConfirmedOwner {
     modifier solarPowered(uint16 _threshold) {
         require(address(carbonLayerInstance) != address(0), 'CarbonLayer instance not set');
 
-        uint16 perecentageSolarFuel = carbonLayerInstance.getFuelPercentage('solar');
+        uint16 percentageSolarFuel = carbonLayerInstance.getFuelPercentage('solar');
 
-        require(perecentageSolarFuel > _threshold, 'Solar fuel percentage below threshold');
+        require(percentageSolarFuel > _threshold, 'Solar fuel percentage below threshold');
 
         _;
     }
@@ -21,15 +21,15 @@ contract CarbonAssert is ConfirmedOwner {
     modifier carbonNeutralPowered(uint16 _threshold) {
         require(address(carbonLayerInstance) != address(0), 'CarbonLayer instance not set');
 
-        uint16 perecentageRenewableFuel = 0;
+        uint16 percentageRenewableFuel = 0;
 
         string[] memory carbonNeutralFuels = carbonLayerInstance.getCarbonNeutralFuels();
 
         for (uint256 i = 0; i < carbonNeutralFuels.length ; i++) {
-            perecentageRenewableFuel += carbonLayerInstance.getFuelPercentage(carbonNeutralFuels[i]);
+            percentageRenewableFuel += carbonLayerInstance.getFuelPercentage(carbonNeutralFuels[i]);
         }
 
-        require(perecentageRenewableFuel > _threshold, 'Carbon neutral fuel below threshold');
+        require(percentageRenewableFuel > _threshold, 'Carbon neutral fuel below threshold');
 
         _;
     }

@@ -28,7 +28,7 @@ contract CarbonCompute is FunctionsClient, ConfirmedOwner {
     bytes public lastResponse;
     bytes public lastError;
         
-    uint32 callbackGasLimit = 300000;
+    uint32 private callbackGasLimit = 300000;
 
     // State variable to store the returned apicall information
     string public apiResponse;
