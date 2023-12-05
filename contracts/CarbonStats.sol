@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import { ConfirmedOwner } from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import "./CarbonLayer.sol";
 
 
-contract CarbonStats {
+contract CarbonStats is ConfirmedOwner {
 
     CarbonLayer public carbonLayerInstance;
 
@@ -37,18 +38,9 @@ contract CarbonStats {
 
     uint256 public sampleSize;
 
-    address public owner;
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only the owner can call this function");
-        _;
-    }
-
-    constructor(address _carbonLayerAddress) {
+    constructor(address _carbonLayerAddress) ConfirmedOwner(msg.sender) {
         carbonLayerInstance = CarbonLayer(_carbonLayerAddress);
-        owner = msg.sender; // Set the contract deployer as the owner
     }
-
 
     function updateStats() external onlyOwner {
         // Get the latest percentages and intensity
@@ -116,6 +108,4 @@ contract CarbonStats {
 
         return Intensity(average);
     }
-
-             
 }

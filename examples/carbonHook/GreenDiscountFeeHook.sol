@@ -17,8 +17,8 @@ import '../../contracts/CarbonQuery.sol';
  */
 contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager, ConfirmedOwner {
     using PoolIdLibrary for PoolKey;
-    uint256 public standardFee = 3000;
-    uint256 public reducedFee = 1000;
+    uint24 public standardFee = 3000;
+    uint24 public reducedFee = 1000;
     uint16 public threshold = 3000;
     CarbonQuery public carbonQueryInstance;
 
@@ -51,7 +51,7 @@ contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager, ConfirmedOwner {
      * @param _standardFee Setter fof the fee charged when the index is below the threshold
      * @param _reducedFee Setter for the fee charged when the index is above the threshold
      */
-    function setFees(uint256 _standardFee, uint256 _reducedFee) external onlyOwner {
+    function setFees(uint24 _standardFee, uint24 _reducedFee) external onlyOwner {
         standardFee = _standardFee;
         reducedFee = _reducedFee;
     }

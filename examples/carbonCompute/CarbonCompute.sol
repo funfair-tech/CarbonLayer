@@ -16,7 +16,6 @@ import { FunctionsRequest } from "@chainlink/contracts/src/v0.8/functions/dev/v1
 contract CarbonCompute is FunctionsClient, ConfirmedOwner {
     using FunctionsRequest for FunctionsRequest.Request;
 
-
     // State variables to store the fees and energy source threshold where the reduced fee is charged
     uint256 public standardFee = 0.002 ether;
     uint256 public reducedFee = 0.001 ether;
@@ -50,10 +49,8 @@ contract CarbonCompute is FunctionsClient, ConfirmedOwner {
 
     // Chaink link fixed Router address and donID - Hardcoded for Sepolia, make adjustable to use in production 
     // Addresses supported network https://docs.chain.link/chainlink-functions/supported-networks
-    address router = 0xb83E47C2bC239B3bf370bc41e1459A34b41238D0;
-    bytes32 donID = 0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000;
-
-
+    address private router = 0xb83E47C2bC239B3bf370bc41e1459A34b41238D0;
+    bytes32 private donID = 0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000;
 
     /**
      * @notice Initializes the contract with the Chainlink router address and sets the contract owner
