@@ -1,6 +1,6 @@
 # 🌱 Carbon Layer 
 
-This project feeds carbon intensity data from the [National Grid](https://www.nationalgrid.com/uk) official [Carbon Intesity API](https://api.carbonintensity.org.uk/) to a carbon intensity consumer contract which exposes its state to be used as part of a composed stack enabling other contracts to limit compute to times of low carbon generation, in other words, services can run in eco mode.
+This project feeds carbon intensity data from the [National Grid](https://www.nationalgrid.com/uk) official [Carbon Intensity API](https://api.carbonintensity.org.uk/) to a carbon intensity consumer contract which exposes its state to be used as part of a composed stack enabling other contracts to limit compute to times of low carbon generation, in other words, services can run in eco-mode.
 
 ## Sepolia Addresses
 | Contract        | Address                                    |
@@ -25,10 +25,10 @@ This project feeds carbon intensity data from the [National Grid](https://www.na
 * Fund your node [address](http://localhost:6688/keys) with ETH
 
 
-* Add the intesity.toml and mix.toml from [jobs](./chainlink-node/jobs/) 
+* Add the intensity.toml and mix.toml from [jobs](./chainlink-node/jobs/) 
 
 
-* **NOTE:** dont forget to set up a view role [docs](https://docs.chain.link/chainlink-nodes/v1/roles-and-access)
+* **NOTE:** don't forget to set up a view role [docs](https://docs.chain.link/chainlink-nodes/v1/roles-and-access)
 
 ## Chainlink Data Feed
 
@@ -58,7 +58,7 @@ This project feeds carbon intensity data from the [National Grid](https://www.na
 
 * **TODO:** look into replicating state across chains. What effect will the CCIP delay have on the service.
 
-* **NOTE:** dont forget the deployer nonce needs to be the same one all chains
+* **NOTE:** don't forget the deployer nonce needs to be the same one all chains
 
 ## Sample Integrations
 
