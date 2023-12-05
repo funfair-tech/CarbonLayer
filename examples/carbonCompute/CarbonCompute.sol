@@ -9,7 +9,7 @@ import { FunctionsRequest } from "@chainlink/contracts/src/v0.8/functions/dev/v1
 
 
 /**
- * @title FunctionClient
+ * @title CarbonCompute
  * @notice This is an example contract to show how to make HTTP requests using CarbonLayer
  *      and charge a fee dependent on the current state of energy production
  */
