@@ -9,7 +9,11 @@ import {BalanceDelta} from "https://github.com/Uniswap/v4-core/src/types/Balance
 import {BaseHook} from "https://github.com/Uniswap/v4-periphery/contracts/BaseHook.sol";
 import '../../contracts/CarbonQuery.sol';
 
-// Discount pool fees for pools that involve real world asset tokens that track energy providers
+/**
+ * @title FunctionClient
+ * @notice This is an example contract to show how CarbonLayer could be used with Uniswap V4 Pools that involve RWA's
+ *      charge a fee dependent on the current state of energy production
+ */
 contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager {
     using PoolIdLibrary for PoolKey;
     address public owner;
@@ -18,6 +22,7 @@ contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager {
     uint16 public threshold = 3000;
     CarbonQuery public carbonQueryInstance;
 
+    // Events
     event CarbonQueryInstanceSet(address indexed _carbonQueryAddress);
 
     modifier onlyOwner() {
@@ -25,13 +30,21 @@ contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager {
         _;
     }
 
+    /**
+     * @notice Initializes the contract with the carbon query address and sets the contract owner
+     * @param _poolManager The address of the Uniswap V4 pool manager contract
+     * @param _carbonQueryAddress The address of the contract to call to get the current carbon index
+     */
     constructor(IPoolManager _poolManager, address _carbonQueryAddress) BaseHook(_poolManager) {
 
         owner = msg.sender;
         setCarbonQuery(_carbonQueryAddress);
-
     }
 
+    /**
+     * @notice Update the retained address of the carbon index contract
+     * @param _carbonQueryAddress The address of the contract to call to get the current carbon index
+     */
     function setCarbonQuery(address _carbonQueryAddress) public onlyOwner {
         require(_carbonQueryAddress != address(0), 'Invalid CarbonQuery address');
 
@@ -40,11 +53,20 @@ contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager {
         emit CarbonQueryInstanceSet(_carbonQueryAddress);
     }
 
+    /**
+     * @notice Update the fees charged for swaps.
+     * @param _standardFee Setter fof the fee charged when the index is below the threshold
+     * @param _reducedFee Setter for the fee charged when the index is above the threshold
+     */
     function setFees(uint256 _standardFee, uint256 _reducedFee) external onlyOwner {
         standardFee = _standardFee;
         reducedFee = _reducedFee;
     }
 
+    /**
+     * @notice Update the threshold at which reduced fees are charged
+     * @param _threshold Setter for the rescued charges threshold
+     */
     function setThreshold(uint16 _threshold) external onlyOwner {
         threshold = _threshold;
     }

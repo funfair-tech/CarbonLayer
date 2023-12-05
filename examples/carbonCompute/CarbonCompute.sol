@@ -77,7 +77,7 @@ contract CarbonCompute is FunctionsClient, ConfirmedOwner {
 
    /**
      * @notice Update the fees charged for calling doWork
-     * @param _standardFee Setter fof the fee chanrged when the index is below the threshold
+     * @param _standardFee Setter fof the fee charged when the index is below the threshold
      * @param _reducedFee Setter for the fee charged when the index is above the threshold
      */
     function setFees(uint256 _standardFee, uint256 _reducedFee) external onlyOwner {
@@ -87,14 +87,14 @@ contract CarbonCompute is FunctionsClient, ConfirmedOwner {
 
    /**
      * @notice Update the threshold at which reduced fees are charged
-     * @param _threshold Setter for the resuced charges threshold
+     * @param _threshold Setter for the rescued charges threshold
      */
-    function setTreshold(uint16 _threshold) external onlyOwner {
+    function setThreshold(uint16 _threshold) external onlyOwner {
         threshold = _threshold;
     }
 
    /**
-     * @notice Whith draw all the accumulated fees to the owners address
+     * @notice With draw all the accumulated fees to the owners address
      */
     function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
@@ -127,7 +127,7 @@ contract CarbonCompute is FunctionsClient, ConfirmedOwner {
             uint256 refund = msg.value - fee;
             payable(msg.sender).transfer(refund);
 
-            emit Refunding("Refunding exess fee to caller", refund);
+            emit Refunding("Refunding excess fee to caller", refund);
         }
     }
 
