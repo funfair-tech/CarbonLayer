@@ -61,6 +61,7 @@ contract GreenDiscountFeeHook is BaseHook, IDynamicFeeManager, ConfirmedOwner {
      * @param _threshold Setter for the rescued charges threshold
      */
     function setThreshold(uint16 _threshold) external onlyOwner {
+        require(_threshold <= 1000, 'Invalid threshold');
         threshold = _threshold;
     }
 
